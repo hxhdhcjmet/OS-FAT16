@@ -1,0 +1,33 @@
+\subsection{函数声明}
+在include目录下的fat.h中声明了实现该FAT-16文件系统所用到的函数,代码如下:
+\begin{ccode}{函数声明}
+//初始化
+void init_fs(void);
+void init_fd_table(void);
+
+//目录
+bool fs_mkdir(const char *dirame);
+bool fs_ls(void);
+bool fs_cd(const char *direname);
+
+
+//文件创建与删除
+bool fs_create(const char *filename);
+bool fs_delete(const char *filename);
+
+//文件操作,读写
+int fs_open(const char * filename,int mode); //返回文件描述符fd
+bool fs_close(int fd);
+int fs_write(int fd,const char *data,int size);
+int fs_read(int fd,char *buffer,int size);
+bool fs_seek(int fd,int offset);
+
+
+//打印提示
+void print_prompt(void);
+
+bool cd(const char *filename);
+bool ls();
+bool mkdir(const char *dirname);
+\end{ccode}
+其中主要包括了系统初始化函数、目录操作函数、文件操作函数(目录的创建、删除和切换当前位置,文件的创建、删除、打开、关闭、读写和定位)以及辅助打印信息函数。

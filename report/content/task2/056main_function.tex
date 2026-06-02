@@ -1,0 +1,21 @@
+\subsubsection{文件系统入口}
+在src文件夹的main.c文件中实现文件系统入口函数,实现同样类似任务一,不同点在于需要实现进程的切换,这里通过维护当前进程号pid的全局变量current\_pid实现。
+具体代码如下:
+\begin{ccode}{进程切换}
+//切换当前操作的进程 
+        else if (strcmp(cmd, "pid") == 0) {
+            int new_pid;
+            if (sscanf(line, "%31s %d", cmd, &new_pid) == 2) {
+                if (new_pid >= 0 && new_pid < MAX_PROCESS) {
+                    current_pid = new_pid;
+                    printf("switched to pid %d\n", current_pid);
+                } else {
+                    printf("invalid pid (0-%d)\n", MAX_PROCESS - 1);
+                }
+            } else {
+                printf("usage: pid <0-%d>\n", MAX_PROCESS - 1);
+            }
+        }
+\end{ccode}
+这里当接收到用户pid n的命令时会尝试将current\_pid切换为n(n在0到MAX\_PROCESS-1之间视为合法进程号),此后的操作会基于新的进程进行。其他操作如mkdir、open等命令格式与任务一相同,虽然在函数声明时需要传入
+pid参数,但这里会自动传入current\_pid,无需手动传递。

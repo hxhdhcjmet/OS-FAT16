@@ -1,0 +1,22 @@
+\section{任务一}
+\subsection{任务内容}
+实现一个简单的类FAT-16文件系统,具有功能:mkdir,ls,delete,open,read,write,close。
+
+\subsection{任务实现规划}
+按照实验指导书的提示,实现的是基于内存的简单文件系统,不需要考虑磁盘操作(定义数组模拟磁盘,不需要考虑磁盘的寻道延迟、旋转延迟和传输延迟),也不需要实现SSD的
+over-provisioning和garbage collection等。重点考虑实现FAT、目录结构、文件结构以及相应的文件操作等即可。
+
+
+
+
+
+\input{content/task1/041header}
+\input{content/task1/042function_state}
+\input{content/task1/043system_init}
+% 目录操作函数
+\input{content/task1/044direntry}
+
+\input{content/task1/045file_open_close}
+\input{content/task1/046file_read_write_del}
+\input{content/task1/047main_function}
+\input{content/task1/048fat16_use}
