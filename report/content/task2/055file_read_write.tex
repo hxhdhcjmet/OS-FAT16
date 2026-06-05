@@ -50,4 +50,4 @@ bool fs_delete(const char *filename)
     return false;
 }
 \end{ccode}
-如果检查到reader\_count大于0,说明还有读者在访问文件,无法删除;如果检查到sem_trywait(&rw\_lock)返回失败,说明有写者在访问文件,同样无法删除。只有当文件空闲没有进程在访问时,才能删除文件,具体删除操作于任务一相同,释放占有的FAT表项和Directory目录项即可。
+如果检查到reader\_count大于0,说明还有读者在访问文件,无法删除;如果检查到sem\_trywait(\&rw\_lock)返回失败,说明有写者在访问文件,同样无法删除。只有当文件空闲没有进程在访问时,才能删除文件,具体删除操作于任务一相同,释放占有的FAT表项和Directory目录项即可。
