@@ -1,7 +1,4 @@
-\subsubsection{文件的打开与关闭}
-在src文件夹中的fd.c文件中实现对文件的打开与关闭,这里打开与关闭文件是便于后续对文件的读写操作,具体代码如下:
-\begin{ccode}{文件的打开与关闭}
-#include "fat.h"
+ #include "fat.h"
 
 int fs_open(const char *filename,int mode){
     if (filename == NULL) return -1;
@@ -41,7 +38,7 @@ int fs_open(const char *filename,int mode){
 
 bool fs_close(int fd){
     //无效fd
-    if (fd < 0 || fd >= MAX_FD){
+    if (fd < 0 || fd > MAX_FD){
         printf("close failed : invalid fd\n");
         return false;
     }
@@ -78,8 +75,3 @@ bool fs_seek(int fd,int offset){
     FDTable[fd].offset = offset;
     return true;
 }
-\end{ccode}
-其中fs\_open()函数用于打开当前目录下指定文件名的文件(这里为了简化实现,没有实现打开任意目录下的文件),通过遍历Directory数组,找到不为空、文件名为指定文件且父目录为当前目录的文件即为要打开的文件,找不到就返回失败并打印错误信息。
-找到后再在FDTable数组(即打开文件表)中查找未使用的项,将其信息同步为当前要打开的文件,并将FDTable数组中对应项的索引返回(即文件描述符),后续对文件的读写操作都基于该索引。fs\_close()函数用于关闭指定文件,因为确定只有确定已经打开的文件
-才需要关闭,因此这里关闭文件函数接收的参数为文件描述符fd。具体实现为检查fd未越界且FDTable数组中对应表项不为空时,将这一项清零即可。
-fs\_seek()函数用于设置文件从何处开始读写,通过接收参数文件描述符fd和偏移量offset,在确认都没有越界的情况下更新FDTable中对应项的offset属性即可。

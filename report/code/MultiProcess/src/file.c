@@ -1,55 +1,60 @@
-\subsubsection{文件读写}
-在src文件夹中的file.c文件中实现文件的读写、删除等函数,其实方法类似任务一,只是在查找目录项、FAT表时为了确保互斥访问和一致性,需要前后申请信号量保护。
-重点修改在删除文件时需要确保没有读者或写者在使用该文件,否则无法删除,具体代码如下:
-\begin{ccode}{删除文件函数}
-bool fs_delete(const char *filename)
+bool fs_delete(int pid, const char *filename)
 {
+    if (pid < 0 || pid >= MAX_PROCESS || filename == NULL) {
+        return false;
+    }
+
+    int cur_dir = ProcessTable[pid].current_dir;
+
     pthread_mutex_lock(&fs_mutex);
 
     for (int i = 0; i < MAX_ENTRY; i++) {
         if (Directory[i].ac == 1 &&
+            Directory[i].parent == cur_dir &&
             Directory[i].type == 0 &&
             strcmp(Directory[i].name, filename) == 0) {
 
-            // 检查文件是否正被打开：
-            //  reader_count > 0 说明有读者
-            //  sem_trywait(&rw_lock) 失败说明有写者
             pthread_mutex_lock(&Directory[i].mutex);
+
             if (Directory[i].reader_count > 0) {
                 pthread_mutex_unlock(&Directory[i].mutex);
                 pthread_mutex_unlock(&fs_mutex);
+
                 printf("Failed to delete file: %s is in use\n", filename);
                 return false;
             }
+
             pthread_mutex_unlock(&Directory[i].mutex);
 
             if (sem_trywait(&Directory[i].rw_lock) != 0) {
                 pthread_mutex_unlock(&fs_mutex);
+
                 printf("Failed to delete file: %s is in use\n", filename);
                 return false;
             }
-            sem_post(&Directory[i].rw_lock);  // 成功拿到写锁，立即释放 
 
             int cur = Directory[i].start_block;
-            while (cur != -1) {
+
+            while (cur != FAT_END) {
                 int next = FAT[cur];
-                FAT[cur] = 0;
-                if (next == -1) break;
+                FAT[cur] = FAT_FREE;
                 cur = next;
             }
 
             Directory[i].ac = 0;
+            Directory[i].size = 0;
+            Directory[i].start_block = FAT_END;
+
+            sem_post(&Directory[i].rw_lock);
             pthread_mutex_unlock(&fs_mutex);
+
             printf("File deleted successfully: %s\n", filename);
             return true;
         }
     }
 
     pthread_mutex_unlock(&fs_mutex);
+
     printf("Failed to delete file: %s\n", filename);
     return false;
 }
-\end{ccode}
-如果检查到 \texttt{reader\_count} 大于 0，说明仍有读者正在访问文件，因此无法执行删除操作；
-如果调用 \texttt{sem\_trywait(\&rw\_lock)} 失败，则说明文件资源已经被写者占用，同样不能删除。
-只有在不存在读者且能够成功获取文件资源信号量时，系统才会沿 FAT 链释放数据块，并将对应目录项标记为未使用。

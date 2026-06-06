@@ -10,7 +10,7 @@
 \begin{figure}[H]
     \centering
     \includegraphics[width = 1\textwidth]{figure/task2_writeonly.png}
-    \caption{写进程独占}
+    \caption{写进程与读进程互斥}
 \end{figure}
 如上图所示,当一个写进程(pid=0)打开文件时,切换其他读进程(pid=1)尝试打开文件失败,提示"file is busy",说明能实现写进程互斥访问文件的功能。
 
